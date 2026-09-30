@@ -36,6 +36,16 @@ public class NativeChatProvider : IChatProvider
         return Task.CompletedTask;
     }
 
+    public Task PushChatMessageAsync(CoreWebView2 coreWebView2, string message, string nick, string color)
+    {
+        if (Uri.TryCreate(coreWebView2.Source, UriKind.Absolute, out var source)
+            && source.GetLeftPart(UriPartial.Path) == GetNavigationUri().GetLeftPart(UriPartial.Path))
+        {
+            PostWebMessage(coreWebView2, "chatMessage", new { Message = message, Nick = nick, Color = color });
+        }
+        return Task.CompletedTask;
+    }
+
     // --- Helper methods --------------------------
     private void SyncChannelSettings()
     {

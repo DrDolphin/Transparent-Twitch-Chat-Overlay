@@ -9,4 +9,5 @@ public interface IChatProvider
     Task ConfigureAsync(CoreWebView2 coreWebView2) => Task.CompletedTask;
     string GetJavascriptToExecute() => string.Empty;
     string GetCssToInject() => string.Empty;
+    Task PushChatMessageAsync(CoreWebView2 coreWebView2, string message, string nick, string color) => Task.CompletedTask;
 }

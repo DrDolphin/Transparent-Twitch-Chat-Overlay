@@ -64,6 +64,20 @@ public class KapChatProvider : IChatProvider
         }
     }
 
+    public Task PushChatMessageAsync(CoreWebView2 coreWebView2, string message, string nick, string color)
+    {
+        if (!Uri.TryCreate(coreWebView2.Source, UriKind.Absolute, out var source)
+            || source.Scheme != Uri.UriSchemeHttps || source.Host != "nightdev.com"
+            || !source.IsDefaultPort || !string.IsNullOrEmpty(source.UserInfo)
+            || source.AbsolutePath != "/hosted/obschat/")
+            return Task.CompletedTask;
+
+        string safeNick = JsonSerializer.Serialize(string.IsNullOrEmpty(nick) ? "System" : nick);
+        string safeMessage = JsonSerializer.Serialize(message ?? string.Empty);
+        string safeTags = JsonSerializer.Serialize(new { color });
+        return coreWebView2.ExecuteScriptAsync($"Chat.insert({safeNick}, {safeTags}, {safeMessage});");
+    }
+
     public string GetCssToInject()
     {
         // If the user has provided their own CSS, use that and bypass our generation.
