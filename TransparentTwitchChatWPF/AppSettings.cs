@@ -85,7 +85,7 @@ public class AppSettings
     /// Deserializes a JSON string into the jChatSettings object and persists the changes.
     /// </summary>
     /// <param name="jsonConfig">The JSON string received from the WebView.</param>
-    public void UpdateJChatConfig(string jsonConfig)
+    public void UpdateJChatConfig(string jsonConfig, bool preserveChannel = false)
     {
         if (string.IsNullOrWhiteSpace(jsonConfig)) return;
 
@@ -97,6 +97,9 @@ public class AppSettings
 
             if (newSettings != null)
             {
+                if (preserveChannel)
+                    newSettings.Channel = this.jChatSettings.Channel;
+
                 // Replace the existing settings object with the new one.
                 this.jChatSettings = newSettings;
 
