@@ -10,6 +10,7 @@ function loadOverlay() {
     const context = vm.createContext({
         jQuery: {},
         setInterval() { return 0; },
+        queueMicrotask,
         window: { location: { search: '' }, chrome: { webview: {
             addEventListener(type, handler) { receive = handler; }, postMessage() {}
         } } },
