@@ -53,6 +53,8 @@ public class NativeChatProvider : IChatProvider
                 : string.Empty;
         }
 
+        // The bundled client has no YouTube relay service. Clear legacy values.
+        App.Settings.jChatSettings.Yt = string.Empty;
         App.Settings.SyncJChatSettings();
     }
 

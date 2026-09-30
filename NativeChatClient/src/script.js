@@ -79,6 +79,7 @@ function populateFormFromSettings(settings) {
     $pruning.prop('checked', settings.disablePruning);
 
     // --- Finally, update the entire preview to reflect the new values ---
+    $ytChannel.val(''); // The desktop app does not provide a YouTube relay.
     initializePreview();
 }
 
@@ -891,7 +892,7 @@ function generateURL(event) {
         disable_sync: $sync.is(":checked"),
         disable_pruning: $pruning.is(":checked"),
         block: $blockedUsers.val().replace(/\s+/g, ""),
-        yt: $ytChannel.val().replace('@', ''),
+        yt: '',
         sms: $sms.is(":checked"),
         message_image: $sms.is(":checked") ? $messageImage.val() : false,
         big_emotes: $bigEmotes.is(":checked"),
@@ -920,7 +921,7 @@ function getSettingsData() {
     const settings = {
         // Channel Settings
         channel: $channel.val(),
-        yt: $ytChannel.val().replace('@', ''),
+        yt: '',
 
         // Appearance Settings
         size: parseInt($size.val(), 10),
@@ -995,7 +996,7 @@ function sendSettingsToHost(event) {
     const settings = {
         // Channel Settings
         channel: $channel.val(),
-        yt: $ytChannel.val().replace('@', ''), // OLD: youtubeChannel, NEW: yt
+        yt: '', // YouTube chat requires a backend that this desktop app does not provide.
 
         // Appearance Settings
         size: parseInt($size.val(), 10), // OLD: textSize, NEW: size
