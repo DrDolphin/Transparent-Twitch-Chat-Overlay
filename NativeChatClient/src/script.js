@@ -23,6 +23,9 @@ function populateFormFromSettings(settings) {
 
     // --- Populate Text Inputs ---
     $channel.val(settings.channel);
+    // The desktop app owns this value on its Chat settings page.
+    document.getElementById('twitch-channel-section').style.display = 'none';
+    $channel.prop('disabled', true);
     $ytChannel.val(settings.yt);
     $regex.val(settings.regex);
     $blockedUsers.val(settings.blockedUsers);

@@ -129,7 +129,7 @@ public partial class AppearanceSettingsPage : UserControl
 
             try
             {
-                App.Settings.UpdateJChatConfig(unescapedJson);
+                App.Settings.UpdateJChatConfig(unescapedJson, preserveChannel: true);
                 App.Settings.SyncJChatSettings();
                 //MessageBox.Show("Settings saved successfully!");
             }
@@ -176,7 +176,7 @@ public partial class AppearanceSettingsPage : UserControl
             if (!string.IsNullOrEmpty(json))
             {
                 Debug.WriteLine("Received configuration from WebView2: " + json);
-                App.Settings.UpdateJChatConfig(json);
+                App.Settings.UpdateJChatConfig(json, preserveChannel: true);
             }
         }
     }
