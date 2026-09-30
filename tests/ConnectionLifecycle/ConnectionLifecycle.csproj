@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseAppHost>false</UseAppHost>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TwitchLib.Api" Version="3.10.0-preview-e47ba7f" />
+    <Compile Include="../../TransparentTwitchChatWPF/View/Settings/Pages/ConnectionSettingsPage.xaml.cs" Link="ConnectionSettingsPage.cs" />
+    <Compile Include="../../TransparentTwitchChatWPF/Twitch/ITwitchAuthService.cs" Link="ITwitchAuthService.cs" />
+  </ItemGroup>
+</Project>
