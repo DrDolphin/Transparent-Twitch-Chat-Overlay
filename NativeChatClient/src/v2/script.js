@@ -67,12 +67,16 @@ nativeChatHost.addEventListener('message', event => {
 
   // Only connect after both objects have been received
   if (hasReceivedConfig && hasReceivedCredentials && !hasStartedNativeChat) {
-      hasStartedNativeChat = true;
       console.log(`All data received. Connecting to channel: ${config.channel}`);
       
       // Apply the settings and connect
-      Chat.applySettings(config);
-      Chat.connect(config.channel);
+      try {
+          Chat.applySettings(config);
+          Chat.connect(config.channel);
+          hasStartedNativeChat = true;
+      } catch (error) {
+          console.error("Failed to start NativeChat:", error);
+      }
   }
 });
 } else {
@@ -195,8 +199,13 @@ Chat = {
     if (cfg.disabledCommands && typeof cfg.disabledCommands === 'string') {
         this.info.disabledCommands = cfg.disabledCommands.split(',');
     }
+    this.info.regex = null;
     if (cfg.regex) {
-        this.info.regex = new RegExp(cfg.regex);
+        try {
+            this.info.regex = new RegExp(cfg.regex);
+        } catch (error) {
+            console.warn("Invalid message filter; regex filtering is disabled:", error);
+        }
     }
     if (cfg.pronounCustomColors && typeof cfg.pronounCustomColors === 'string') {
         try {
