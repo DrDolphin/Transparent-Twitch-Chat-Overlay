@@ -166,7 +166,7 @@ public partial class MainWindow : Window, BrowserWindow
 
     JsCallbackFunctions jsCallbackFunctions;
     List<BrowserWindow> windows = new List<BrowserWindow>();
-    private Chat _currentChat;
+    private IChatProvider _chatProvider;
     private Button _closeButton;
 
     private bool _isShowingRepairPrompt = false;
@@ -188,7 +188,6 @@ public partial class MainWindow : Window, BrowserWindow
         _webViewConfigurator = webViewConfigurator ?? throw new ArgumentNullException(nameof(webViewConfigurator));
         _nativeChatFileManager = nativeChatFileManager ?? throw new ArgumentNullException(nameof(nativeChatFileManager));
 
-        _currentChat = new CustomURLChat(ChatTypes.CustomURL); // TODO: initializing here needed?
 
         Growl.GrowlMessageRequested += HandleGrowlMessage;
 
@@ -1419,6 +1418,7 @@ public partial class MainWindow : Window, BrowserWindow
     {
         string localIndex = LocalHtmlHelper.GetIndexHtmlPath();
         bool success = false;
+        _chatProvider = null;
         try
         {
             // Use the factory to create the correct provider
@@ -1429,6 +1429,7 @@ public partial class MainWindow : Window, BrowserWindow
             // Get the navigation URI from the provider
             Uri navigationUri = chatProvider.GetNavigationUri();
             webView.CoreWebView2.Navigate(navigationUri.AbsoluteUri);
+            _chatProvider = chatProvider;
             success = true;
         }
         catch (NotSupportedException ex)
@@ -1533,46 +1534,33 @@ public partial class MainWindow : Window, BrowserWindow
 
     private void PushNewMessage(string message = "")
     {
-        string js = this._currentChat.PushNewMessage(message);
-
-        if (!string.IsNullOrEmpty(js))
-        {
-            this.webView.ExecuteScriptAsync(js);
-        }
+        PushNewChatMessageDispatcherInvoke(message, "System");
     }
 
     private void PushNewChatMessage(string message = "", string nick = "", string color = "")
     {
-        //this.Browser1.Dispatcher.Invoke(new Action(() => { });
-
-        string js = this._currentChat.PushNewChatMessage(message, nick, color);
-        if (!string.IsNullOrEmpty(js))
-            this.webView.ExecuteScriptAsync(js);
+        PushNewChatMessageDispatcherInvoke(message, nick, color);
     }
 
     private void PushNewMessageDispatcherInvoke(string message = "")
     {
-        string js = this._currentChat.PushNewMessage(message);
-
-        if (!string.IsNullOrEmpty(js))
-        {
-            this.webView.Dispatcher.Invoke(() =>
-            {
-                this.webView.ExecuteScriptAsync(js);
-            });
-        }
+        PushNewChatMessageDispatcherInvoke(message, "System");
     }
 
     private void PushNewChatMessageDispatcherInvoke(string message = "", string nick = "", string color = "")
     {
-        string js = this._currentChat.PushNewChatMessage(message, nick, color);
-        if (!string.IsNullOrEmpty(js))
+        _ = Dispatcher.InvokeAsync(async () =>
         {
-            this.webView.Dispatcher.Invoke(() =>
+            if (webView?.CoreWebView2 == null || _chatProvider == null) return;
+            try
             {
-                this.webView.ExecuteScriptAsync(js);
-            });
-        }
+                await _chatProvider.PushChatMessageAsync(webView.CoreWebView2, message, nick, color);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not display a host chat message.");
+            }
+        });
     }
 
     /*private void EventSubConnectedInit()
@@ -1667,18 +1655,10 @@ public partial class MainWindow : Window, BrowserWindow
     {
         if (string.IsNullOrEmpty(message)) return;
         if (!hasWebView2Runtime) return;
-        if (_currentChat == null) return;
+        if (_chatProvider == null) return;
         if (this.webView == null) return;
 
-        string js = _currentChat.PushNewMessage(message);
-
-        if (!string.IsNullOrEmpty(js))
-        {
-            this.webView.Dispatcher.Invoke(() =>
-            {
-                this.webView.ExecuteScriptAsync(js);
-            });
-        }
+        PushNewMessageDispatcherInvoke(message);
     }
 
     public void SetTopMost(bool topMost)

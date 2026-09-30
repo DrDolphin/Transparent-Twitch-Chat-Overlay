@@ -40,11 +40,20 @@ let hasReceivedCredentials = false;
 let hasStartedNativeChat = false;
 const nativeChatProtocolVersion = 1;
 const nativeChatHost = window.chrome && window.chrome.webview ? window.chrome.webview : null;
+const pendingHostMessages = [];
+
+function flushPendingHostMessages() {
+  if (hasStartedNativeChat) {
+    pendingHostMessages.splice(0).forEach(payload => Chat.writeHostMessage(payload));
+  }
+}
 
 if (nativeChatHost) {
 nativeChatHost.addEventListener('message', event => {
   // The event.data contains the JSON string sent from C#
   const message = event.data; // event.data is already a JS object
+  // Wait until this message's configuration/startup handler has finished.
+  queueMicrotask(flushPendingHostMessages);
   
   // Check the type of the message and handle it
   switch (message.type) {
@@ -60,6 +69,14 @@ nativeChatHost.addEventListener('message', event => {
           console.log("Credentials received.");
           break;
           
+      case 'chatMessage':
+          if (hasStartedNativeChat) Chat.writeHostMessage(message.payload);
+          else {
+              if (pendingHostMessages.length >= 100) pendingHostMessages.shift();
+              pendingHostMessages.push(message.payload);
+          }
+          return;
+
       default:
           console.warn("Received unknown message type:", message.type);
           return;
@@ -1121,6 +1138,20 @@ Chat = {
     
     // Return the jQuery object
     return $chatLine;
+  },
+
+  writeHostMessage: function (payload) {
+    if (!payload || typeof payload.message !== 'string') return;
+    const nick = Chat.sanitizeUsername(payload.nick || 'System');
+    const tags = {
+      id: 'host-' + Date.now() + '-' + Math.random().toString(36).slice(2),
+      badges: '',
+      emotes: '',
+      color: payload.color || '#a1b3c4',
+      'display-name': escapeHtml(nick),
+      'user-id': ''
+    };
+    Chat.write(nick, tags, payload.message, 'twitch');
   },
 
   write: function (nick, info, message, service) {
