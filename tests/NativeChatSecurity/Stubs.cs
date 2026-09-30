@@ -8,7 +8,7 @@ namespace TransparentTwitchChatWPF
         public void SyncJChatSettings() { }
     }
     public class TestGeneralSettings { public string Username { get; set; } = "testchannel"; public string OAuthToken { get; set; } = "synthetic-test-token"; }
-    public class TestChatSettings { public string Channel { get; set; } }
+    public class TestChatSettings { public string Channel { get; set; } public string Yt { get; set; } }
 }
 namespace TransparentTwitchChatWPF.Helpers
 {
