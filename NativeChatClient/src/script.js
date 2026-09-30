@@ -23,7 +23,7 @@ function populateFormFromSettings(settings) {
 
     // --- Populate Text Inputs ---
     $channel.val(settings.channel);
-    $ytChannel.val(settings.yt);
+    $ytChannel.val('');
     $regex.val(settings.regex);
     $blockedUsers.val(settings.blockedUsers);
     $messageImage.val(settings.messageImage);
@@ -879,7 +879,7 @@ function generateURL(event) {
         disable_sync: $sync.is(":checked"),
         disable_pruning: $pruning.is(":checked"),
         block: $blockedUsers.val().replace(/\s+/g, ""),
-        yt: $ytChannel.val().replace('@', ''),
+        yt: '',
         sms: $sms.is(":checked"),
         message_image: $sms.is(":checked") ? $messageImage.val() : false,
         big_emotes: $bigEmotes.is(":checked"),
@@ -908,7 +908,7 @@ function getSettingsData() {
     const settings = {
         // Channel Settings
         channel: $channel.val(),
-        yt: $ytChannel.val().replace('@', ''),
+        yt: '',
 
         // Appearance Settings
         size: parseInt($size.val(), 10),
@@ -983,7 +983,7 @@ function sendSettingsToHost(event) {
     const settings = {
         // Channel Settings
         channel: $channel.val(),
-        yt: $ytChannel.val().replace('@', ''), // OLD: youtubeChannel, NEW: yt
+        yt: '', // YouTube chat requires a backend that this desktop app does not provide.
 
         // Appearance Settings
         size: parseInt($size.val(), 10), // OLD: textSize, NEW: size
