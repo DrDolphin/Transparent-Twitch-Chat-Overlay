@@ -30,7 +30,6 @@ function populateFormFromSettings(settings) {
     $regex.val(settings.regex);
     $blockedUsers.val(settings.blockedUsers);
     $messageImage.val(settings.messageImage);
-    $custom_font.val(settings.font); // Assuming font name is stored here if custom
 
     // --- Populate Dropdowns ---
     $size.val(settings.size);
@@ -43,9 +42,19 @@ function populateFormFromSettings(settings) {
     $shadow.val(settings.shadow);
     $pronounColorMode.val(settings.pronounColorMode);
 
-    // If the font is not a custom one, set the dropdown by its value
-    if (fonts.includes(settings.font)) {
-        $font.val(fonts.indexOf(settings.font));
+    const savedFont = String(settings.font ?? '0');
+    const customIndex = fonts.indexOf('Custom');
+    const isNumericFont = /^\d+$/.test(savedFont);
+    const presetIndex = isNumericFont ? Number(savedFont) : fonts.indexOf(savedFont);
+    if (presetIndex >= 0 && presetIndex < customIndex) {
+        $font.val(presetIndex);
+        $custom_font.val('');
+    } else if (savedFont && !isNumericFont) {
+        $font.val(customIndex);
+        $custom_font.val(savedFont);
+    } else {
+        $font.val(0);
+        $custom_font.val('');
     }
 
     // --- Populate Checkboxes ---
