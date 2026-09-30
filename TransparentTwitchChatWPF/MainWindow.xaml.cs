@@ -461,6 +461,7 @@ public partial class MainWindow : Window, BrowserWindow
 
         webView.CoreWebView2InitializationCompleted += webView_CoreWebView2InitializationCompleted;
         webView.NavigationCompleted += webView_NavigationCompleted;
+        webView.CoreWebView2.NavigationStarting += webView_NavigationStarting;
         webView.WebMessageReceived += webView_WebMessageReceived;
         webView.CoreWebView2.ProcessFailed += webView_CoreWebView2ProcessFailed;
 
@@ -900,7 +901,13 @@ public partial class MainWindow : Window, BrowserWindow
 
     private void webView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
     {
-        Console.WriteLine("webView_NavigationStarting");
+        if (App.Settings.GeneralSettings.ChatType == (int)ChatTypes.NativeChat
+            && !NativeChatBridgeSecurity.IsTrustedOverlaySource(e.Uri)
+            && !NativeChatBridgeSecurity.IsRepairSource(e.Uri, _isShowingRepairPrompt))
+        {
+            e.Cancel = true;
+            _logger.LogWarning("Blocked navigation away from the NativeChat overlay.");
+        }
     }
 
     private async void webView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
@@ -993,6 +1000,13 @@ public partial class MainWindow : Window, BrowserWindow
         }
         else if (App.Settings.GeneralSettings.ChatType == (int)ChatTypes.NativeChat)
         {
+            bool trustedOverlay = NativeChatBridgeSecurity.IsTrustedOverlaySource(e.Source)
+                && NativeChatBridgeSecurity.IsTrustedOverlaySource(webView.CoreWebView2.Source);
+            bool trustedRepair = NativeChatBridgeSecurity.IsRepairSource(e.Source, _isShowingRepairPrompt)
+                && NativeChatBridgeSecurity.IsRepairSource(webView.CoreWebView2.Source, _isShowingRepairPrompt);
+            if (!trustedOverlay && !trustedRepair)
+                return;
+
             string json = e.WebMessageAsJson;
             if (string.IsNullOrWhiteSpace(json))
                 return;
@@ -1023,6 +1037,9 @@ public partial class MainWindow : Window, BrowserWindow
                     string type = typeElement.GetString() ?? string.Empty;
                     if (type == "NativeChatReady")
                     {
+                        if (!trustedOverlay)
+                            return;
+
                         int protocolVersion = root.TryGetProperty("protocolVersion", out JsonElement protocolElement)
                             ? protocolElement.GetInt32()
                             : 0;

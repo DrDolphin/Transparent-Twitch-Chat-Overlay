@@ -21,6 +21,9 @@ public class NativeChatProvider : IChatProvider
 
     public Task ConfigureAsync(CoreWebView2 coreWebView2)
     {
+        if (!NativeChatBridgeSecurity.IsTrustedOverlaySource(coreWebView2.Source))
+            return Task.CompletedTask;
+
         SyncChannelSettings();
 
         PostWebMessage(coreWebView2, "config", App.Settings.jChatSettings);
