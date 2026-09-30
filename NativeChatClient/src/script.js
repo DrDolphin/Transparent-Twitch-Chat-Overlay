@@ -23,7 +23,7 @@ function populateFormFromSettings(settings) {
 
     // --- Populate Text Inputs ---
     $channel.val(settings.channel);
-    $ytChannel.val('');
+    $ytChannel.val(settings.yt);
     $regex.val(settings.regex);
     $blockedUsers.val(settings.blockedUsers);
     $messageImage.val(settings.messageImage);
@@ -67,6 +67,7 @@ function populateFormFromSettings(settings) {
     $pruning.prop('checked', settings.disablePruning);
 
     // --- Finally, update the entire preview to reflect the new values ---
+    $ytChannel.val(''); // The desktop app does not provide a YouTube relay.
     initializePreview();
 }
 
