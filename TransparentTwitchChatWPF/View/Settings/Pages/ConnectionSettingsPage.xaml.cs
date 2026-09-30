@@ -35,16 +35,23 @@ public partial class ConnectionSettingsPage : UserControl
     {
         InitializeComponent();
         _twitchAuthService = twitchAuthService;
-        // Subscribe to the instance event.
-        _twitchAuthService.AccessTokenReceived += OnAccessTokenReceived;
-
-        // Unsubscribe to prevent memory leaks
-        this.Unloaded += (s, e) => {
-            _twitchAuthService.AccessTokenReceived -= OnAccessTokenReceived;
-        };
+        Loaded += ConnectionSettingsPage_Loaded;
+        Unloaded += ConnectionSettingsPage_Unloaded;
 
         _api = new TwitchAPI();
         _api.Settings.ClientId = "yv4bdnndvd4gwsfw7jnfixp0mnofn7";
+    }
+
+    private void ConnectionSettingsPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        // The settings window reuses this page after navigating away and back.
+        _twitchAuthService.AccessTokenReceived -= OnAccessTokenReceived;
+        _twitchAuthService.AccessTokenReceived += OnAccessTokenReceived;
+    }
+
+    private void ConnectionSettingsPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _twitchAuthService.AccessTokenReceived -= OnAccessTokenReceived;
     }
 
     public void SetupValues()
