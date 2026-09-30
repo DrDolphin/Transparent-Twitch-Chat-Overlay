@@ -19,6 +19,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: NativeChatClient/package-lock.json
+
+      - name: Build NativeChat assets
+        working-directory: NativeChatClient
+        run: |
+          npm ci
+          npm run build
+
       # 2. Set up the .NET SDK on the runner
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
